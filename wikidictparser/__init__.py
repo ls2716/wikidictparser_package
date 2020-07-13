@@ -1,1 +1,1 @@
-from .router import get_parser
+from .router import get_parser, set_debug

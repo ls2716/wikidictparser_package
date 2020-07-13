@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import traceback
 import sys
+import logging
 
 
 from .english import EnWiktionaryParser
@@ -44,5 +45,9 @@ def get_parser(language):
         raise KeyError(f'"{language}" is not a valid option for parser language.')
     
     return parser_routing_dict[language]()
+
+
+def set_debug():
+    logging.basicConfig(level=logging.DEBUG)
     
 
