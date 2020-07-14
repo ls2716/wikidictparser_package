@@ -170,14 +170,16 @@ class PlWiktionaryParser(WiktionaryParserBase):
         number_list = []
         number_string = number_string[1:-1]
         logging.debug(f'No brackets: {number_string}')
-        # separating commas
+        # separating number expression separated by commas
         number_string_list = number_string.strip(' ').split(',')
         logging.debug(f'string list {number_string_list}')
+        # for every unit number expression (like 1.1-3) - parse
         for unit_number_string in number_string_list:
-            expression_majors = r'^(\d+)\-(\d+)$'
-            expression_major = r'^(\d+)$'
-            expression_minors = r'^(\d+)\.(\d+)\-(\d+)$'
-            expression_minor = r'^(\d+)\.(\d+)$'
+            expression_majors = r'^(\d+)\-(\d+)$'  # matches 2-3
+            expression_major = r'^(\d+)$'  # matches 1
+            expression_minors = r'^(\d+)\.(\d+)\-(\d+)$'  # matches 1.1-3
+            expression_minor = r'^(\d+)\.(\d+)$'  # matches 1.1
+            # Try out every match and add appriopriate (major, minor) tuple/s
             if re.match(expression_minors, unit_number_string):
                 logging.debug('Expression minors')
                 match = re.match(expression_minors, unit_number_string)
@@ -214,23 +216,29 @@ class PlWiktionaryParser(WiktionaryParserBase):
     def clean_declination_df(self, df, part_of_speech):
         """Clean declination dataframe
 
-        This function cleans declination dataframe
+        This function cleans declination dataframe.
+        It is due to the fact that pandas.read_html
+        doesn't work perfectly on wikitionary tables.
         """
         parts_of_speech = part_of_speech.split(' ')
-        print(parts_of_speech)
+        logging.debug(parts_of_speech)
+        # check if a verb with normal conjugation
         if 'czasownik' in part_of_speech and\
                 'nieosobowy' not in parts_of_speech and\
                 'niewłaściwy' not in parts_of_speech:
             col_names = list(df.columns)
+            # delete unnamed columns
             cols_to_delete =\
                 [col_name for col_name in col_names
                     if col_name[:7] == 'Unnamed']
             df = df.drop(columns=cols_to_delete)
+            # merge first two columns
             for i in range(df.shape[0]):
                 if df['forma'].iloc[i] != df['forma.1'].iloc[i]:
                     df['forma'].iloc[i] =\
                         df['forma'].iloc[i] + ' ' + df['forma.1'].iloc[i]
             df = df.drop(columns=['forma.1'])
+            # merge first two rows as a df header
             for col in df.columns:
                 if df[col].iloc[0] != col:
                     df[col].iloc[0] = col.split('.')[0] + ' ' + df[col].iloc[0]
@@ -238,14 +246,16 @@ class PlWiktionaryParser(WiktionaryParserBase):
             df = df.iloc[1:]
             df.columns = new_header
 
+        # if an adjective
         if 'przymiotnik' in parts_of_speech:
+            # set new header
             new_header = ['przypadek', 'liczba pojedyncza mos/mzw',
                           'liczba pojedyncza mrz',
                           'liczba pojedyncza ż', 'liczba pojedyncza n',
                           'liczba mnoga mos', 'liczba mnoga nmos']
             df = df.iloc[2:]
             df.columns = new_header
-
+        # set first column as index
         index_column = list(df.columns)[0]
         df = df.set_index(index_column)
         return df
@@ -266,13 +276,15 @@ class PlWiktionaryParser(WiktionaryParserBase):
         else:
             return
         declination_dict = {}
+        # for every tag in declination tags
         for tag in declination_tags:
             logging.debug(f'Declination tag {tag}')
             dds = tag.select('dl > dd')
             for dd in dds:
+                # check if not empty
                 if not dd.text:
                     continue
-
+                # find corresponding numbers
                 corresponding_number = dd.text.split(')')[0]+')'
                 logging.debug(
                     f'Meaning numbers: {corresponding_number}.')
@@ -286,10 +298,13 @@ class PlWiktionaryParser(WiktionaryParserBase):
                 logging.debug(
                     f'Number list {number_list}'
                 )
+                # check if doesn't decline
+                declination = None
                 if dd.find('span', {'title': 'nieodmienny'}):
                     logging.debug('nieodmienny')
-                    declination = None
-                if dd.select('table'):
+                    declination = 'nieodmienny'
+                # if a table found
+                elif dd.select('table'):
                     table = dd.select('table')[0]
                     if table.select('style'):
                         table.style.extract()
@@ -309,7 +324,9 @@ class PlWiktionaryParser(WiktionaryParserBase):
                                                                part_of_speech)
                     declination_df.to_csv('test.csv')
                     declination = declination_df
-
+                else:
+                    raise Exception(
+                        f"Could not parse declination for {number_list}.")
                 for numbers in number_list:
                     major = numbers[0]
                     minor = numbers[1]

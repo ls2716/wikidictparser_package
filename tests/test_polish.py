@@ -28,6 +28,18 @@ class PolishParserTestSuite(unittest.TestCase):
             self.assertTrue(list(subsection_dict.keys())[0] == 'heading')
             self.assertTrue('znaczenia' in subsection_dict.keys())
 
+    def test_adjective_declination(self):
+        self.parser.fetch('mądry')
+        declination_dict =\
+            self.parser.language_section_dict['pl']['odmiana'][1][1]
+        self.assertTrue('liczba pojedyncza n' in declination_dict.keys())
+    
+    def test_verb_declination(self):
+        self.parser.fetch('widzieć')
+        declination_dict =\
+            self.parser.language_section_dict['pl']['odmiana'][1][1]
+        self.assertTrue('liczba pojedyncza 1. os.' in declination_dict.keys())
+
 
 if __name__ == '__main__':
     unittest.main()

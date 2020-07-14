@@ -91,3 +91,6 @@ ENV/
 
 # VScode settings
 .vscode
+
+# test csv
+test.csv
