@@ -23,6 +23,8 @@ setup(
     install_requires=[
           'requests',
           'bs4',
+          'pandas',
+          'lxml',
       ],
     packages=find_packages(exclude=('tests', 'docs'))
 )
