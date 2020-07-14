@@ -2,3 +2,4 @@ nose
 sphinx
 requests
 bs4
+pandas
