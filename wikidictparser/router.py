@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
-import traceback
-import sys
 import logging
-
 
 from .english import EnWiktionaryParser
 from .polish import PlWiktionaryParser
 
 parser_routing_dict = {
     # english
-    'wiktionary' : EnWiktionaryParser,
+    'wiktionary': EnWiktionaryParser,
     'en': EnWiktionaryParser,
     'english': EnWiktionaryParser,
     'enwiki': EnWiktionaryParser,
@@ -22,6 +19,7 @@ parser_routing_dict = {
     'plwiki': PlWiktionaryParser,
     'plwiktionary': PlWiktionaryParser,
 }
+
 
 def get_parser(language):
     """get parser function
@@ -37,17 +35,20 @@ def get_parser(language):
         - wiktionary | en | english | enwiki | enwiktionary
             - english wiktionary parser
 
-        - wikisłownik | wikislownik | pl | polish | plwiki | plwiktionary 
+        - wikisłownik | wikislownik | pl | polish | plwiki | plwiktionary
             - polish wiktionary parser
     """
-    
-    if not language in parser_routing_dict.keys():
-        raise KeyError(f'"{language}" is not a valid option for parser language.')
-    
+
+    if language not in parser_routing_dict.keys():
+        raise KeyError(
+            f'"{language}" is not a valid option for parser language.')
+
     return parser_routing_dict[language]()
 
 
-def set_debug():
-    logging.basicConfig(level=logging.DEBUG)
-    
-
+def set_logging_level(level):
+    temp_dict = {
+        'debug': logging.DEBUG,
+        'info': logging.INFO,
+    }
+    logging.basicConfig(level=temp_dict[level])
