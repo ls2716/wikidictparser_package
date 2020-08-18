@@ -18,7 +18,7 @@ setup(
     long_description=readme,
     author='Lukasz Sliwinski',
     author_email='luki3141@gmail.com',
-    url='https://github.com/ls2716/wikidictparser_package/archive/v_01.tar.gz',
+    url='https://github.com/ls2716/wikidictparser_package/archive/0.1.tar.gz',
     license=license,
     install_requires=[
           'requests',
