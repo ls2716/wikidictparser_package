@@ -13,7 +13,7 @@ with open('LICENSE') as f:
 
 setup(
     name='wikidictparser',
-    version='0.1',
+    version='1.1',
     # description='Sample package for Python-Guide.org',
     long_description=readme,
     author='Lukasz Sliwinski',
