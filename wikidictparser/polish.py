@@ -43,7 +43,7 @@ class PlWiktionaryParser(WiktionaryParserBase):
         self.parse_declination()
         # parse conjugation for each meaning if exists
 
-        return {}
+        return {k:v for k, v in self.language_section_dict['pl'].items() if k in ('znaczenia', 'odmiana')}
 
     def get_language_section_dict(self):
         """Get language section function
@@ -108,12 +108,12 @@ class PlWiktionaryParser(WiktionaryParserBase):
             self.language_section_dict[lang] = subsection_dict
 
     def parse_meanings(self):
-        """ parse meanings function
+        """ Parse meanings function.
 
         This function parsers the meanings subsection
-        (marked with key "znaczenia".)
+        (marked with key "znaczenia").
         """
-        # for every language section
+        # For every language section:
         for lang in self.language_section_dict.keys():
             meaning_tags = self.language_section_dict[lang]['znaczenia']
             major = 0
@@ -132,7 +132,7 @@ class PlWiktionaryParser(WiktionaryParserBase):
                     part_of_speech = tag.select('p > i')[0].text
                     logging.debug(f'Major {major},\
                          part of speect {part_of_speech}.')
-                # if meaning then parse meaning
+                # If meaning exists then parse meaning.
                 elif tag.select('span.field-title'):
                     logging.debug(f'Found tag {tag}')
                     pass
@@ -322,7 +322,6 @@ class PlWiktionaryParser(WiktionaryParserBase):
                         self.language_section_dict['pl']['znaczenia'][number_list[0][0]][1]['part_of_speech']
                     declination_df = self.clean_declination_df(declination_df,
                                                                part_of_speech)
-                    declination_df.to_csv('test.csv')
                     declination = declination_df
                 else:
                     raise Exception(
