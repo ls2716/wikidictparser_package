@@ -7,6 +7,7 @@ from setuptools import setup, find_packages
 
 with open('README.md') as f:
     readme = f.read()
+long_desc = "Wikidict parser package"
 
 with open('LICENSE') as f:
     license = f.read()
@@ -15,7 +16,8 @@ setup(
     name='wikidictparser',
     version='1.1',
     # description='Sample package for Python-Guide.org',
-    long_description=readme,
+    long_description=long_desc,
+    long_description_content_type="text/markdown",
     author='Lukasz Sliwinski',
     author_email='luki3141@gmail.com',
     url='https://github.com/ls2716/wikidictparser_package/archive/v1.1.tar.gz',
