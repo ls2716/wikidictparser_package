@@ -16,8 +16,9 @@ setup(
     name='wikidictparser',
     version='1.1',
     # description='Sample package for Python-Guide.org',
-    long_description=long_desc,
     long_description_content_type="text/markdown",
+    long_description=readme,
+    
     author='Lukasz Sliwinski',
     author_email='luki3141@gmail.com',
     url='https://github.com/ls2716/wikidictparser_package/archive/v1.1.tar.gz',
