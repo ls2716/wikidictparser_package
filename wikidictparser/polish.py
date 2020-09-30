@@ -19,6 +19,25 @@ class PlWiktionaryParser(WiktionaryParserBase):
         self.language_of_interest = 'pl'
         super().__init__(url)
 
+    def fetch_by_meaning(self, word):
+        """Get data for word and return result sorted by meaning"""
+        result = self.fetch(word)
+        out_dict = {}
+        for major in result['znaczenia'].keys():
+            for minor in result['znaczenia'][major]:
+                local_id = str(major)+'.'+str(minor)
+                out_dict[local_id] = {}
+                temp = result['znaczenia'][major][minor]
+                out_dict[local_id]['global_id'] = "%s_%s"%(word, local_id)
+                for key in temp.keys():
+                    out_dict[local_id][key] = temp[key]
+                try:
+                    out_dict[local_id]['odmiana'] = result['odmiana'][major][minor]
+                except KeyError:
+                    out_dict[local_id]['odmiana'] = 'nieodm.'
+        return out_dict
+
+
     def get_word_data(self):
         """Get word data function
 
@@ -42,6 +61,7 @@ class PlWiktionaryParser(WiktionaryParserBase):
         # parse declination for each meaning if exists
         self.parse_declination()
         # parse conjugation for each meaning if exists
+
 
         return {k:v for k, v in self.language_section_dict['pl'].items() if k in ('znaczenia', 'odmiana')}
 
