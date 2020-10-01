@@ -23,6 +23,8 @@ class PlWiktionaryParser(WiktionaryParserBase):
         """Get data for word and return result sorted by meaning"""
         result = self.fetch(word)
         out_dict = {}
+        if result==None:
+            return None
         for major in result['znaczenia'].keys():
             for minor in result['znaczenia'][major]:
                 local_id = str(major)+'.'+str(minor)
@@ -61,9 +63,12 @@ class PlWiktionaryParser(WiktionaryParserBase):
         # parse declination for each meaning if exists
         self.parse_declination()
         # parse conjugation for each meaning if exists
+        
 
-
-        return {k:v for k, v in self.language_section_dict['pl'].items() if k in ('znaczenia', 'odmiana')}
+        try:
+            return {k:v for k, v in self.language_section_dict['pl'].items() if k in ('znaczenia', 'odmiana')}
+        except:
+            return None
 
     def get_language_section_dict(self):
         """Get language section function
@@ -151,7 +156,7 @@ class PlWiktionaryParser(WiktionaryParserBase):
                     minor = 0
                     part_of_speech = tag.select('p > i')[0].text
                     logging.debug(f'Major {major},\
-                         part of speect {part_of_speech}.')
+                         part of speech {part_of_speech}.')
                 # If meaning exists then parse meaning.
                 elif tag.select('span.field-title'):
                     logging.debug(f'Found tag {tag}')
@@ -164,15 +169,15 @@ class PlWiktionaryParser(WiktionaryParserBase):
                             number = meaning_text.split(' ')[0]
                             meaning_text = meaning_text[len(number):]
                             logging.debug(f'Minor {minor}, number {number}, ' +
-                                          f'meaning: {meaning_text}.')
+                                          f'tekst/text: {meaning_text}.')
                             # check if numbering is correct
                             # - if not raise Exception
                             if f'({major}.{minor})' != number:
                                 raise Exception('The numbering for meaning ' +
                                                 f'{meaning} is inconsistent.')
                             meanings[major][minor] = {
-                                'part_of_speech': part_of_speech,
-                                'meaning': meaning_text,
+                                'część_mowy/part_of_speech': part_of_speech,
+                                'tekst/text': meaning_text,
                             }
                     except Exception:
                         logging.debug(f'Failed to parse tag {tag}.')
@@ -312,11 +317,24 @@ class PlWiktionaryParser(WiktionaryParserBase):
                 if not dd.text:
                     continue
                 # find corresponding numbers
-                corresponding_number = dd.text.split(')')[0]+')'
+                logging.debug(
+                    f'DD text: {dd.text}'
+                )
+                prog = re.compile(r'\([\d\ \.\,\-]*\)')
+                corresponding_number = prog.search(dd.text)
+                
+                if not corresponding_number:
+                    print('Bad numbering')
+                    corresponding_number = '(1)'
+                else:
+                    logging.debug(
+                        f'DD match group: {corresponding_number.group()}'
+                    )
+                    corresponding_number = corresponding_number.group()
                 logging.debug(
                     f'Meaning numbers: {corresponding_number}.')
                 logging.debug(
-                    f'DD text: {dd.contents[0]}'
+                    f'DD contents: {dd.contents[0]}'
                 )
                 number_list = self.parse_numbering(
                     corresponding_number,
@@ -330,12 +348,16 @@ class PlWiktionaryParser(WiktionaryParserBase):
                 if dd.find('span', {'title': 'nieodmienny'}):
                     logging.debug('nieodmienny')
                     declination = 'nieodmienny'
+                elif dd.find('span', {'title': 'zobacz'}):
+                    logging.debug('odnośnik')
+                    declination = 'specjalne'
                 # if a table found
                 elif dd.select('table'):
                     table = dd.select('table')[0]
                     if table.select('style'):
                         table.style.extract()
                     table_string = str(table)
+                    table_string = table_string.replace('<br/><', '<')
                     table_string = table_string.replace('<br/>', ',')
                     # check if table inside table
                     if table.select('table'):
@@ -345,7 +367,7 @@ class PlWiktionaryParser(WiktionaryParserBase):
                         table_string = table_string.replace(bad_tags, '')
                     declination_df = pd.read_html(table_string, header=0)[0]
                     part_of_speech =\
-                        self.language_section_dict['pl']['znaczenia'][number_list[0][0]][1]['part_of_speech']
+                        self.language_section_dict['pl']['znaczenia'][number_list[0][0]][1]['część_mowy/part_of_speech']
                     declination_df = self.clean_declination_df(declination_df,
                                                                part_of_speech)
                     declination = declination_df.to_dict('index')
