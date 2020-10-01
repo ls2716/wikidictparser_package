@@ -267,7 +267,7 @@ class PlWiktionaryParser(WiktionaryParserBase):
             df.columns = new_header
 
         # if an adjective
-        if 'przymiotnik' in parts_of_speech:
+        if 'przymiotnik' in parts_of_speech or 'zaimek' in parts_of_speech:
             # set new header
             new_header = ['przypadek', 'liczba pojedyncza mos/mzw',
                           'liczba pojedyncza mrz',
@@ -342,7 +342,11 @@ class PlWiktionaryParser(WiktionaryParserBase):
                         self.language_section_dict['pl']['znaczenia'][number_list[0][0]][1]['part_of_speech']
                     declination_df = self.clean_declination_df(declination_df,
                                                                part_of_speech)
-                    declination = declination_df
+                    declination = declination_df.to_dict()
+                    # print(declination)
+                    for key1, value1 in declination.items():
+                        for key2, value2 in value1.items():
+                            value1[key2] = value2.replace(' / ',',').replace(' /',',').replace('/ ',',').replace('/',',').replace(', ',',').split(',')
                 else:
                     raise Exception(
                         f"Could not parse declination for {number_list}.")
