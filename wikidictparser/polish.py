@@ -34,7 +34,7 @@ class PlWiktionaryParser(WiktionaryParserBase):
                 try:
                     out_dict[local_id]['odmiana'] = result['odmiana'][major][minor]
                 except KeyError:
-                    out_dict[local_id]['odmiana'] = 'nieodm.'
+                    out_dict[local_id]['odmiana'] = 'nieodmienny'
         return out_dict
 
 
@@ -273,7 +273,14 @@ class PlWiktionaryParser(WiktionaryParserBase):
                           'liczba pojedyncza mrz',
                           'liczba pojedyncza ż', 'liczba pojedyncza n',
                           'liczba mnoga mos', 'liczba mnoga nmos']
-            df = df.iloc[2:]
+            if df.shape[0]>11:
+                for i in range(13,20):
+                    df.iloc[i,0] = df.iloc[i,0]+" stopień wyższy"
+                for i in range(24,31):
+                    df.iloc[i,0] = df.iloc[i,0]+" stopień najwyższy"
+                df = df.iloc[list(range(2,9))+list(range(13,20))+list(range(24,31))]
+            else:
+                df = df.iloc[2:-2]
             df.columns = new_header
         # set first column as index
         index_column = list(df.columns)[0]
@@ -337,13 +344,11 @@ class PlWiktionaryParser(WiktionaryParserBase):
                         bad_tags = """</tbody></table></td></tr>"""
                         table_string = table_string.replace(bad_tags, '')
                     declination_df = pd.read_html(table_string, header=0)[0]
-
                     part_of_speech =\
                         self.language_section_dict['pl']['znaczenia'][number_list[0][0]][1]['part_of_speech']
                     declination_df = self.clean_declination_df(declination_df,
                                                                part_of_speech)
-                    declination = declination_df.to_dict()
-                    # print(declination)
+                    declination = declination_df.to_dict('index')
                     for key1, value1 in declination.items():
                         for key2, value2 in value1.items():
                             value1[key2] = value2.replace(' / ',',').replace(' /',',').replace('/ ',',').replace('/',',').replace(', ',',').split(',')
