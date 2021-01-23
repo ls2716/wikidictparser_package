@@ -9,7 +9,7 @@ class PolishParserTestSuite(unittest.TestCase):
     """Basic test cases."""
 
     parser = wdp.get_parser('pl')
-    words_to_check = ['to', 'tamto', 'można', 'drzewo']
+    words_to_check = ['to', 'tamto', 'można', 'drzewo', 'słowo']
 
     def test_not_found(self):
         self.assertIsNone(self.parser.fetch('abfk'))

@@ -14,14 +14,14 @@ with open('LICENSE') as f:
 
 setup(
     name='wikidictparser',
-    version='1.2',
+    version='1.3',
     # description='Sample package for Python-Guide.org',
     long_description_content_type="text/markdown",
-    long_description=readme,
+    long_description="README.md",
     
     author='Lukasz Sliwinski',
     author_email='luki3141@gmail.com',
-    url='https://github.com/ls2716/wikidictparser_package/archive/v1.2.tar.gz',
+    url='https://github.com/ls2716/wikidictparser_package/archive/v1.3.tar.gz',
     license=license,
     install_requires=[
           'requests',
